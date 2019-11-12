@@ -18,45 +18,42 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.algaworks.algamoney.api.event.RecursoCriadoEvent;
-import com.algaworks.algamoney.api.model.Categoria;
-import com.algaworks.algamoney.api.repository.CategoriaRepository;
+import com.algaworks.algamoney.api.model.Lancamento;
+import com.algaworks.algamoney.api.repository.LancamentoRepository;
 
 @RestController
-@RequestMapping("/categorias")
-public class CategoriaResource {
+@RequestMapping("/lancamentos")
+public class LancamentoResource {
 
 	@Autowired
-	private CategoriaRepository categoriaRepository;
+	private LancamentoRepository lancamentoRepository;
 
 	@Autowired
 	private ApplicationEventPublisher publisher;
 
 	@GetMapping
-	public List<Categoria> listar() {
-		return categoriaRepository.findAll();
-	}
-
-	@PostMapping
-	public ResponseEntity<Categoria> criar(@Valid @RequestBody Categoria categoria, HttpServletResponse response) {
-		Categoria categoriaSalva = categoriaRepository.save(categoria);
-
-		publisher.publishEvent(new RecursoCriadoEvent(this, response, categoriaSalva.getCodigo()));
-
-		return ResponseEntity.status(HttpStatus.CREATED).body(categoriaSalva);
-
+	public List<Lancamento> listar() {
+		return lancamentoRepository.findAll();
 	}
 
 	@GetMapping("/{codigo}")
-	public ResponseEntity<Categoria> buscarPeloCodigo(@PathVariable Long codigo) {
-
-		Optional<Categoria> categoria = categoriaRepository.findById(codigo);
-
-		if (categoria.isPresent()) {
-			return ResponseEntity.ok(categoria.get());
+	public ResponseEntity<Lancamento> buscar(@PathVariable Long codigo) {
+		Optional<Lancamento> lancamentoBuscado = lancamentoRepository.findById(codigo);
+		if (lancamentoBuscado.isPresent()) {
+			return ResponseEntity.ok(lancamentoBuscado.get());
 		} else {
 			return ResponseEntity.notFound().build();
 		}
-
 	}
 
+	@PostMapping
+	public ResponseEntity<Lancamento> cadastrar(@Valid @RequestBody Lancamento lancamento,
+			HttpServletResponse response) {
+		lancamento.setCodigo(null);
+		Lancamento lancamentoSalvo = lancamentoRepository.save(lancamento);
+
+		publisher.publishEvent(new RecursoCriadoEvent(this, response, lancamentoSalvo.getCodigo()));
+
+		return ResponseEntity.status(HttpStatus.CREATED).body(lancamentoSalvo);
+	}
 }
