@@ -28,15 +28,14 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 	public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 		clients.inMemory().withClient("angular").secret("$2a$10$4CvdsdqhNu/A1ERtlyqOYeSbwnRbL7xCbPclZ7k3o6HvWw0oU3v1u") // @ngul@r0
 				.scopes("read", "write").authorizedGrantTypes("password", "refresh_token")
-				.accessTokenValiditySeconds(1800).refreshTokenValiditySeconds(3600 * 24);
+				.accessTokenValiditySeconds(1800).refreshTokenValiditySeconds(3600 * 24).and().withClient("mobile") // @ngul@r0
+				.secret("$2a$10$MVW33jxiJliZYy9BNCd.eOyW4ahzBLee1US1X9/IlJsKkWLRKSsL2").scopes("read")
+				.authorizedGrantTypes("password", "refresh_token").accessTokenValiditySeconds(1800)
+				.refreshTokenValiditySeconds(3600 * 24);
 	}
 
 	@Override
 	public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
-		// TokenEnhancerChain tokenEnhancerChain = new TokenEnhancerChain();
-		// tokenEnhancerChain.setTokenEnhancers(Arrays.asList(tokenEnhancer(),
-		// accessTokenConverter()));
-
 		endpoints.tokenStore(tokenStore()).reuseRefreshTokens(false).userDetailsService(userDetailsService)
 				.accessTokenConverter(accessTokenConverter()).authenticationManager(authenticationManager);
 	}
